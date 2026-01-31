@@ -144,23 +144,48 @@ function displayProducts(products) {
   // Thêm từng sản phẩm vào bảng
   currentProducts.forEach((product, index) => {
     const row = document.createElement('tr');
-    const imageUrl = getImageUrl(product.images);
-    
-    // Tạo img element riêng để xử lý tốt hơn
-    const img = document.createElement('img');
-    img.className = 'product-image';
-    img.alt = product.title;
-    img.referrerPolicy = 'no-referrer'; // Quan trọng: Ẩn referrer để Imgur không chặn
-    img.src = imageUrl;
-    img.onerror = function() {
-      this.src = 'https://via.placeholder.com/150x150?text=No+Image';
-    };
     
     const td1 = document.createElement('td');
     td1.textContent = startIndex + index + 1;
     
+    // Tạo gallery cho tất cả hình ảnh
     const td2 = document.createElement('td');
-    td2.appendChild(img);
+    const imageGallery = document.createElement('div');
+    imageGallery.className = 'image-gallery';
+    
+    // Lấy tất cả hình ảnh (tối đa 3 hình)
+    const images = product.images || [];
+    const imagesToShow = images.slice(0, 3);
+    
+    imagesToShow.forEach(imageUrl => {
+      const img = document.createElement('img');
+      img.className = 'product-image';
+      img.alt = product.title;
+      img.referrerPolicy = 'no-referrer';
+      
+      // Xử lý URL ảnh
+      let cleanUrl = imageUrl;
+      if (typeof cleanUrl === 'string') {
+        cleanUrl = cleanUrl.replace(/[\[\]"]/g, '').trim();
+      }
+      
+      img.src = cleanUrl;
+      img.onerror = function() {
+        this.src = 'https://via.placeholder.com/80x80?text=No+Image';
+      };
+      
+      imageGallery.appendChild(img);
+    });
+    
+    // Nếu không có hình nào, hiển thị placeholder
+    if (imagesToShow.length === 0) {
+      const img = document.createElement('img');
+      img.className = 'product-image';
+      img.src = 'https://via.placeholder.com/80x80?text=No+Image';
+      imageGallery.appendChild(img);
+    }
+    
+    td2.appendChild(imageGallery);
     
     const td3 = document.createElement('td');
     td3.textContent = product.title;
